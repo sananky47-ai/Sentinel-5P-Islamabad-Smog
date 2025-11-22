@@ -9,7 +9,7 @@ This project uses Python and Google Earth Engine to analyze atmospheric Nitrogen
 * **Result:** Detected a **300% increase** in $NO_2$ concentration during the onset of the smog season (Nov 1st - Nov 22nd).
 
 ## Visualization
-![Smog Graph](NAME_OF_YOUR_UPLOADED_IMAGE_FILE.jpg) 
+![Smog Graph](download.png) 
 *(Make sure the name matches your uploaded file exactly, including .jpg or .png)*
 
 ## How to Run
