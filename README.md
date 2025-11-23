@@ -10,7 +10,7 @@ This project uses Python and Google Earth Engine to analyze atmospheric Nitrogen
 
 ## Visualization
 ![Smog Graph](download.png) 
-*(Make sure the name matches your uploaded file exactly, including .jpg or .png)*
+*Smog Graph till 22nd November*
 
 ## How to Run
 1. Open the `.ipynb` file in this repository.
