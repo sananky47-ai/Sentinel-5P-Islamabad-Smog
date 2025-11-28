@@ -8,7 +8,7 @@ from google.oauth2.credentials import Credentials
 st.set_page_config(page_title="Smog Assassin", layout="wide")
 st.title("🛰️ Sentinel-5P Smog Monitor")
 
-# 2. Authentication (Project ID Locked)
+# 2. Authentication (Hardcoded Project ID)
 try:
     if "earth_engine" in st.secrets:
         token_str = st.secrets["earth_engine"]["token"]
@@ -19,18 +19,16 @@ try:
     # Parse token
     token_info = json.loads(token_str)
     
-    # Surgical Scope Fix (Keep this!)
+    # Surgical Scope Fix
     token_info['scopes'] = ['https://www.googleapis.com/auth/earthengine.readonly']
     
     # Create Credentials
     creds = Credentials.from_authorized_user_info(token_info)
     
-    # --- THE FIX IS HERE ---
-    # We force it to use 'ist-research-2025' or the numeric ID from your token
-    # This prevents it from guessing 'ee-sananky47'
-    project_id = token_info.get("project", "ist-research-2025")
-    
-    ee.Initialize(credentials=creds, project=project_id)
+    # --- THE FIX ---
+    # We are using the Numeric ID we found in your token: 339680349370
+    # This bypasses the 'ee-sananky47' error completely.
+    ee.Initialize(credentials=creds, project='339680349370')
     
 except Exception as e:
     st.error(f"❌ Authentication Failed: {e}")
