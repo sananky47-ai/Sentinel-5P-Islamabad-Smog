@@ -8,23 +8,27 @@ from google.oauth2.credentials import Credentials
 st.set_page_config(page_title="Smog Assassin", layout="wide")
 st.title("🛰️ Sentinel-5P Smog Monitor")
 
-# 2. Authentication (Direct Injection - No Files)
+# 2. Authentication (Surgical Scope Fix)
 try:
-    # Get the token string from secrets
     if "earth_engine" in st.secrets:
         token_str = st.secrets["earth_engine"]["token"]
     else:
         st.error("❌ Secrets not found.")
         st.stop()
     
-    # Convert string to Dictionary
+    # Parse the token
     token_info = json.loads(token_str)
     
-    # Create a Credential Object manually
+    # --- SURGERY START ---
+    # We force the scopes to be ONLY Earth Engine.
+    # This fixes the "Invalid Scope" error by removing Drive/Cloud storage junk.
+    token_info['scopes'] = ['https://www.googleapis.com/auth/earthengine.readonly']
+    # --- SURGERY END ---
+    
+    # Create Credentials
     creds = Credentials.from_authorized_user_info(token_info)
     
-    # Initialize Earth Engine with these specific credentials
-    # We bypass the file system entirely here
+    # Initialize
     ee.Initialize(credentials=creds)
     
 except Exception as e:
@@ -63,6 +67,12 @@ try:
         'max': 0.0002, 
         'palette': ['black', 'blue', 'purple', 'cyan', 'green', 'yellow', 'red']
     }
+    
+    m.addLayer(col, vis, "NO2 Levels")
+    m.to_streamlit(height=600)
+    
+except Exception as e:
+    st.error(f"Map Error: {e}")
     
     m.addLayer(col, vis, "NO2 Levels")
     m.to_streamlit(height=600)
