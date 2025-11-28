@@ -2,14 +2,19 @@ import streamlit as st
 import geemap.foliumap as geemap
 import ee
 import json
+import os
 from google.oauth2.credentials import Credentials
 
 # 1. Page Setup
 st.set_page_config(page_title="Smog Assassin", layout="wide")
 st.title("🛰️ Sentinel-5P Smog Monitor")
 
-# 2. Authentication (Hardcoded Project ID)
+# 2. Authentication (The Double Lock)
 try:
+    # LOCK 1: Set the Environment Variable
+    # This tells Google Cloud exactly who is paying (Student Account)
+    os.environ['GOOGLE_CLOUD_PROJECT'] = '339680349370'
+    
     if "earth_engine" in st.secrets:
         token_str = st.secrets["earth_engine"]["token"]
     else:
@@ -25,13 +30,12 @@ try:
     # Create Credentials
     creds = Credentials.from_authorized_user_info(token_info)
     
-    # --- THE FIX ---
-    # We are using the Numeric ID we found in your token: 339680349370
-    # This bypasses the 'ee-sananky47' error completely.
+    # LOCK 2: Initialize with Explicit Project ID
     ee.Initialize(credentials=creds, project='339680349370')
     
 except Exception as e:
     st.error(f"❌ Authentication Failed: {e}")
+    st.write("If the error mentions 'ee-sananky47', the app did not update yet. Please Reboot.")
     st.stop()
 
 # 3. The Controls
