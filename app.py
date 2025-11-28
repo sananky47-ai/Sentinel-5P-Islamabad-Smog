@@ -1,47 +1,37 @@
 import streamlit as st
-import os
+import geemap.foliumap as geemap
+import ee
 import json
+from google.oauth2.credentials import Credentials
 
 # 1. Page Setup
 st.set_page_config(page_title="Smog Assassin", layout="wide")
 st.title("🛰️ Sentinel-5P Smog Monitor")
 
-# 2. Authentication (The Priority Task)
-# We do this BEFORE importing geemap to prevent early connection errors
+# 2. Authentication (Direct Injection - No Files)
 try:
-    # Get token from secrets
+    # Get the token string from secrets
     if "earth_engine" in st.secrets:
-        ee_token = st.secrets["earth_engine"]["token"]
+        token_str = st.secrets["earth_engine"]["token"]
     else:
         st.error("❌ Secrets not found.")
         st.stop()
     
-    # Write the token to the disk
-    # GEE looks for this specific path
-    credentials_path = os.path.expanduser("~/.config/earthengine/")
-    os.makedirs(credentials_path, exist_ok=True)
-    json_token = json.loads(ee_token) # Parse to ensure valid JSON
+    # Convert string to Dictionary
+    token_info = json.loads(token_str)
     
-    # Write the file
-    with open(os.path.join(credentials_path, "credentials"), "w") as f:
-        f.write(json.dumps(json_token)) # Write clean JSON
+    # Create a Credential Object manually
+    creds = Credentials.from_authorized_user_info(token_info)
     
-    # NOW we import Earth Engine and Initialize
-    import ee
-    
-    # Initialize with the specific project ID found in your token
-    # This prevents the "Project not found" error
-    project_id = json_token.get("project", "ist-research-2025")
-    ee.Initialize(project=project_id)
+    # Initialize Earth Engine with these specific credentials
+    # We bypass the file system entirely here
+    ee.Initialize(credentials=creds)
     
 except Exception as e:
-    st.error(f"❌ Authentication Error: {e}")
+    st.error(f"❌ Authentication Failed: {e}")
     st.stop()
 
-# 3. Import Geemap (ONLY AFTER AUTH IS DONE)
-import geemap.foliumap as geemap
-
-# 4. The Controls
+# 3. The Controls
 with st.sidebar:
     st.header("Control Panel")
     city = st.selectbox("Choose Target:", ["Islamabad (IST)", "Lahore", "Karachi"])
@@ -56,7 +46,7 @@ with st.sidebar:
         coords = [24.8607, 67.0011]
         zoom = 10
 
-# 5. The Map
+# 4. The Map
 st.subheader(f"Live Pollution Map: {city}")
 
 try:
@@ -79,8 +69,3 @@ try:
     
 except Exception as e:
     st.error(f"Map Error: {e}")
-    st.write("---")
-    st.write("### How to fix:")
-    st.write("If the token preview above looks wrong, go back to Secrets and fix it.")
-    st.write("Try using triple quotes in Secrets like this:")
-    st.code("[earth_engine]\ntoken = '''PASTE_TOKEN_HERE'''")
