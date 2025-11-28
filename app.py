@@ -7,31 +7,22 @@ import os
 st.set_page_config(page_title="Smog Assassin", layout="wide")
 st.title("🛰️ Sentinel-5P Smog Monitor")
 
-# 2. Authentication (Loud Debugging Version)
+# 2. Authentication (Universal Fix)
 try:
-    # Check if secrets exist
-    if "earth_engine" not in st.secrets:
-        st.error("❌ Error: The '[earth_engine]' section is missing from Secrets.")
-        st.stop()
-        
-    if "token" not in st.secrets["earth_engine"]:
-        st.error("❌ Error: The 'token' key is missing. Did you misspell it?")
-        st.stop()
-    
-    # Get the token
+    # 1. Get the token from Secrets
     ee_token = st.secrets["earth_engine"]["token"]
     
-    # Write it to disk
+    # 2. Write it to the location Earth Engine expects
     credentials_path = os.path.expanduser("~/.config/earthengine/")
     os.makedirs(credentials_path, exist_ok=True)
     with open(os.path.join(credentials_path, "credentials"), "w") as f:
         f.write(ee_token)
-        
-    # Initialize
-    ee.Initialize(project='ist-research-2025')
+    
+    # 3. Initialize WITHOUT a specific project name
+    # This forces GEE to use the default project inside your token
+    ee.Initialize()
     
 except Exception as e:
-    # THIS is what we need to see
     st.error(f"❌ CRITICAL FAILURE: {e}")
     st.stop()
 # 3. The Controls
